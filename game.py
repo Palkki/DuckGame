@@ -19,7 +19,7 @@ game = {
 }
 
 # region Duck
-    def initial_state():
+def initial_state():
         """
         Puts the game back into its initial state: the duck is put back into the
         launch position, its speed to zero, and its flight state to False.
@@ -31,7 +31,7 @@ game = {
         game["flight"] = False
 
 
-    def launch():
+def launch():
         """
         Launches a duck and calculates its starting velocity. Stores x and y velocity
         components to the game dictionary.
