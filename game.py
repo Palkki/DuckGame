@@ -7,7 +7,8 @@ WIN_HEIGHT = 720
 GRAVITY = 0.1
 GRAVITATION_ACCEL = 1.5
 
-bg_0 = sweeperlib.load_background_image("sprites", "background_0.jpg")
+menu = sweeperlib.load_background_image("sprites", "background_0.jpg")
+map_1 = sweeperlib.load_background_image("sprites", "background_1.png")
 
 game = {
     "start_x": 120,
@@ -63,49 +64,18 @@ def flight(elapsed):
 # endregion
 
 # region Inputs
-def keypress(sym, mods):
-    """
-    This function handles keyboard inputs.
-    """
-    key = sweeperlib.pyglet.window.key
-
-    if sym == key.Q:
-        sweeperlib.close()
-
-    if sym == key.R:
-        initial_state()
-
-    if sym == key.RIGHT:
-        game["angle"] -= 10
-        if game["angle"] < 0:
-            game["angle"] = 350
-    elif sym == key.LEFT:
-        game["angle"] += 10
-        if game["angle"] > 350:
-            game["angle"] = 0
-
-    if sym == key.UP:
-        if game["force"] < 50:
-            game["force"] += 5
-    elif sym == key.DOWN:
-        if game["force"] >= 5:
-            game["force"] -= 5
-        else:
-            game["force"] = 0
-
-    if sym == key.SPACE:
-        launch()
-
 
 def drag_duck(x, y, dy, dx, MOUSE_LEFT, modifiers):
-    if abs(x - game["x"] - 10) < 15 and abs(y - game["y"] - 10) < 15:
-        game["x"] = x - 10
-        game["y"] = y - 10
-        x_difference = game["start_x"] - game["x"] + 30
-        y_difference = game["start_y"] - game["y"] + 80
-        game["force"] = math.sqrt((x_difference)**2 + (y_difference)**2) / 5
-        game["angle"] = math.atan2(y_difference, x_difference)
-        game["dragging"] = True
+    for i in range(1,4):
+        if game["menu"] == i:
+            if abs(x - game["x"] - 10) < 15 and abs(y - game["y"] - 10) < 15:
+                game["x"] = x - 10
+                game["y"] = y - 10
+                x_difference = game["start_x"] - game["x"] + 10
+                y_difference = game["start_y"] - game["y"] + 20
+                game["force"] = math.sqrt((x_difference)**2 + (y_difference)**2) / 4
+                game["angle"] = math.atan2(y_difference, x_difference)
+                game["dragging"] = True
 
 
 def mouse_handler(x, y, MOUSE_LEFT, modifiers):
@@ -139,10 +109,15 @@ def mouse_handler(x, y, MOUSE_LEFT, modifiers):
         if 510 < x < 770 and 90 < y < 200: # If press on back
             sweeperlib.clear_window()
             game["menu"] = 0
+    
 
 
-    if game["menu"] == 5:
+    if game["menu"] == 5: # Checks to see if in score menu
         pass
+
+    else:   # every other case, in a map
+        pass
+
 
 def release_duck(x, y, MOUSE_LEFT, modifiers):
         if game["dragging"]:
@@ -159,28 +134,31 @@ def draw():
     """
     This function handles interface's and objects drawing.
     """
-    if game["menu"] == 0:
+    if game["menu"] == 0:       # Displays main menu
         sweeperlib.clear_window()
         sweeperlib.draw_background()
         prepare_mainmenu()
         sweeperlib.draw_sprites()
-    if game["menu"] == 4:
+    
+    elif game["menu"] == 4:     # Displays Choose Map Menu
         sweeperlib.draw_background()
         prepare_choosemaps()
         sweeperlib.draw_sprites()
-
-    #sweeperlib.prepare_sprite("sling", 100, 115)
-    #sweeperlib.prepare_sprite("duck", game["x"], game["y"])
-    #sweeperlib.draw_sprites()
-    #sweeperlib.draw_text("{}°\tforce: {}".format(game["angle"], game["force"]), 10, 505)
-    #sweeperlib.draw_text(
-    #    "Q: Quit  | "
-    #    "R: Reset |  "
-    #    "←/→: Set angle |  "
-    #    "↑/↓: Set Force  |  "
-    #    "Space: Launch",
-    #    10, 560,
-    #    size=20)
+    
+    elif game["menu"] == 5:     # Displays Score menu
+        sweeperlib.draw_background()
+        prepare_choosemaps()
+        sweeperlib.draw_sprites()
+    
+    else:       # Displays one of the maps
+        sweeperlib.clear_window()
+        sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = map_1)
+        sweeperlib.draw_background()
+        sweeperlib.prepare_sprite("sling", 100, 115)
+        sweeperlib.prepare_sprite("duck", game["x"], game["y"])
+        sweeperlib.draw_sprites()
+        sweeperlib.draw_text("Aim: {}°".format(round(math.degrees(game["angle"]))), 10, 600)
+        sweeperlib.draw_text("Powah!: {}".format(round(game["force"])), 10, 660)
 
 def prepare_mainmenu():
     sweeperlib.prepare_sprite("choose_map", 470, 410)
@@ -196,9 +174,8 @@ def prepare_choosemaps():
 
 def main():
     sweeperlib.load_sprites("sprites")
-    sweeperlib.create_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = bg_0)
+    sweeperlib.create_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = menu)
     sweeperlib.set_draw_handler(draw)
-    sweeperlib.set_keyboard_handler(keypress)
     sweeperlib.set_interval_handler(flight)
     sweeperlib.set_mouse_handler(mouse_handler)
     sweeperlib.set_drag_handler(drag_duck)
