@@ -98,7 +98,13 @@ def load_sprites(path):
     images["f"] = pyglet.resource.image("tile_flag.png")
     images["duck"] = pyglet.resource.image("duck.png")
     images["sling"] = pyglet.resource.image("sling.png")
-    images["background"] = pyglet.resource.image("background.png")
+    images["choose_map"] = pyglet.resource.image("choose_map.png")
+    images["score"] = pyglet.resource.image("score.png")
+    images["quit"] = pyglet.resource.image("quit.png")
+    images["random_map"] = pyglet.resource.image("random_map.png")
+    images["map_1"] = pyglet.resource.image("map_1.png")
+    images["map_2"] = pyglet.resource.image("map_2.png")
+    images["back"] = pyglet.resource.image("back.png")
     graphics["images"] = images
 
 def load_duck(path):
