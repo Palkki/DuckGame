@@ -24,7 +24,7 @@ game = {
     "flight": False,        # Tells if duck is flying
     "dragging": False,      # Tells if user is dragging the duck
     "ducks": 3,     # Remaining amount of ducks
-    "menu": 0,      # 0 = mainmenu,  1 = map1,  2 = map2,  3 = random,  4 = choose maps,  5 = score
+    "menu": 0,      # 0 = mainmenu,  1 = map1,  2 = map2,  3 = random,  4 = choose maps
     "boxes": []
 }
 
@@ -87,10 +87,6 @@ def mouse_handler(x, y, MOUSE_LEFT, modifiers):
             sweeperlib.clear_window()
             game["menu"] = 4
 
-        if 470 < x < 820 and 255 < y < 405: # If press on Score
-            sweeperlib.clear_window()
-            game["menu"] = 5
-
         if 470 < x < 820 and 95 < y < 245: # If press on quit
             sweeperlib.close() # Quits the game
 
@@ -112,11 +108,6 @@ def mouse_handler(x, y, MOUSE_LEFT, modifiers):
             sweeperlib.clear_window()
             game["menu"] = 0
     
-
-
-    if game["menu"] == 5: # Checks to see if in score menu
-        pass
-
     else:   # every other case, in a map
         pass
 
@@ -147,11 +138,6 @@ def draw():
         prepare_choosemaps()
         sweeperlib.draw_sprites()
     
-    elif game["menu"] == 5:     # Displays Score menu
-        sweeperlib.draw_background()
-        prepare_score()
-        sweeperlib.draw_sprites()
-    
     else:       # Displays one of the maps
         sweeperlib.clear_window()
         sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = map_1)
@@ -163,20 +149,14 @@ def draw():
         sweeperlib.draw_text("Powah!: {}".format(round(game["force"])), 10, 660)
 
 def prepare_mainmenu():
-    sweeperlib.prepare_sprite("choose_map", 470, 410)
-    sweeperlib.prepare_sprite("score", 470, 255)
-    sweeperlib.prepare_sprite("quit", 470, 95)
+    sweeperlib.prepare_sprite("choose_map", 470, 340)
+    sweeperlib.prepare_sprite("quit", 470, 165)
 
 def prepare_choosemaps():
     sweeperlib.prepare_sprite("map_1", 510, 450)
     sweeperlib.prepare_sprite("map_2", 510, 330)
     sweeperlib.prepare_sprite("random_map", 510, 210)
     sweeperlib.prepare_sprite("back", 510, 90)
-
-def prepare_score():
-    # Jotain tekstiä millä saa tiedostosta jutun, muista myös lisätä
-    # Tiedostoon tallennus vaikkapa kun voittaa pelin yms yms
-    pass
 
 
 def main():
