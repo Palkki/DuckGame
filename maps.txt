@@ -1,0 +1,16 @@
+{"map_1": {
+    targets: []
+    obstacles: []
+
+
+
+    },
+
+"map_2": {
+    targets: []
+    obstacles: []
+
+
+    }
+
+}

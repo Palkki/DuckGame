@@ -6,15 +6,17 @@ WIN_WIDTH = 1280
 WIN_HEIGHT = 720
 GRAVITY = 0.1
 GRAVITATION_ACCEL = 1.5
+sling_x = 110
+sling_y = 115
 
 menu = sweeperlib.load_background_image("sprites", "background_0.jpg")
 map_1 = sweeperlib.load_background_image("sprites", "background_1.png")
 
 game = {
-    "start_x": 120,
-    "start_y": 220,
-    "x": 120,
-    "y": 220,
+    "start_x": 130,
+    "start_y": 240,
+    "x": 132,
+    "y": 225,
     "angle": 0,
     "force": 0,
     "x_velocity": 0,
@@ -32,8 +34,8 @@ def initial_state():
     Puts the game back into its initial state: the duck is put back into the
     launch position, its speed to zero, and its flight state to False.
     """
-    game["x"] = 120
-    game["y"] = 220
+    game["x"] = 132
+    game["y"] = 225
     game["angle"]: 0
     game["force"]: 0
     game["x_velocity"] = 0
@@ -67,12 +69,12 @@ def flight(elapsed):
 
 def drag_duck(x, y, dy, dx, MOUSE_LEFT, modifiers):
     for i in range(1,4):
-        if game["menu"] == i:
+        if game["menu"] == i and not game["flight"]:
             if abs(x - game["x"] - 10) < 15 and abs(y - game["y"] - 10) < 15:
                 game["x"] = x - 10
                 game["y"] = y - 10
-                x_difference = game["start_x"] - game["x"] + 10
-                y_difference = game["start_y"] - game["y"] + 20
+                x_difference = game["start_x"] - game["x"]
+                y_difference = game["start_y"] - game["y"]
                 game["force"] = math.sqrt((x_difference)**2 + (y_difference)**2) / 4
                 game["angle"] = math.atan2(y_difference, x_difference)
                 game["dragging"] = True
@@ -154,7 +156,7 @@ def draw():
         sweeperlib.clear_window()
         sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = map_1)
         sweeperlib.draw_background()
-        sweeperlib.prepare_sprite("sling", 100, 115)
+        sweeperlib.prepare_sprite("sling", sling_x, sling_y)
         sweeperlib.prepare_sprite("duck", game["x"], game["y"])
         sweeperlib.draw_sprites()
         sweeperlib.draw_text("Aim: {}°".format(round(math.degrees(game["angle"]))), 10, 600)
