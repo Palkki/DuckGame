@@ -98,6 +98,7 @@ def load_sprites(path):
     images["f"] = pyglet.resource.image("tile_flag.png")
     images["duck"] = pyglet.resource.image("duck.png")
     images["sling"] = pyglet.resource.image("sling.png")
+    images["background"] = pyglet.resource.image("background.png")
     graphics["images"] = images
 
 def load_duck(path):
