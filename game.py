@@ -147,7 +147,7 @@ def draw():
     
     elif game["menu"] == 5:     # Displays Score menu
         sweeperlib.draw_background()
-        prepare_choosemaps()
+        prepare_score()
         sweeperlib.draw_sprites()
     
     else:       # Displays one of the maps
@@ -170,6 +170,11 @@ def prepare_choosemaps():
     sweeperlib.prepare_sprite("map_2", 510, 330)
     sweeperlib.prepare_sprite("random_map", 510, 210)
     sweeperlib.prepare_sprite("back", 510, 90)
+
+def prepare_score():
+    # Jotain tekstiä millä saa tiedostosta jutun, muista myös lisätä
+    # Tiedostoon tallennus vaikkapa kun voittaa pelin yms yms
+    pass
 
 
 def main():
