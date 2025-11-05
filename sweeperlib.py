@@ -405,7 +405,7 @@ def draw_background():
 
     graphics["background"].draw()
 
-def draw_text(text, x, y, color=(0, 0, 0, 255), font="DejaVu Serif", size=32):
+def draw_text(text, x, y, color=(0, 0, 0, 255), font="Calibri", size=32):
     """
     Draws text on the screen. Can be used if you want to write something to
     the game window (e.g. counters or instructions). Default font is serif,

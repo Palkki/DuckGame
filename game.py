@@ -1,11 +1,13 @@
 import sweeperlib
 import random
 import math
+import time
 
 WIN_WIDTH = 1280
 WIN_HEIGHT = 720
 GRAVITY = 0.1
 GRAVITATION_ACCEL = 1.5
+BOUNCE_MODIFIER = 0.55       # Higher number == higher bounce.
 sling_x = 110
 sling_y = 115
 
@@ -60,8 +62,13 @@ def flight(elapsed):
         game["x"] += game["x_velocity"]
         game["y"] += game["y_velocity"]
         game["y_velocity"] -= GRAVITATION_ACCEL
-        if game["y"] <= 0:
-            initial_state()
+        if game["y"] <= 100:
+            game["x_velocity"] /= 1.5
+            game["y_velocity"] = -BOUNCE_MODIFIER * game["y_velocity"]
+            if abs(game["x_velocity"] - game["y_velocity"]) < 0.5 or game["x_velocity"] < 1:
+                time.sleep(1/4)
+                initial_state()
+            
 
 # endregion
 
