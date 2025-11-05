@@ -2,6 +2,7 @@ import sweeperlib
 import random
 import math
 import time
+from sweeperlib import KEYS
 
 WIN_WIDTH = 1280
 WIN_HEIGHT = 720
@@ -9,13 +10,17 @@ GRAVITATION_ACCEL = 1.5     # y_velocity modifier
 BOUNCE_MODIFIER = 0.4       # Higher number == higher bounce.
 
 sling_x = 300
-sling_y = 115       
+sling_y = 115     
+ceiling = 350
+floor = 70
+l_wall = 50
+r_wall = 380  
 
 # region Backgrounds
 main_menu_bg = sweeperlib.load_background_image("sprites", "background_0.jpg")
 map_1_bg = sweeperlib.load_background_image("sprites", "background_1.png")
-map_2_bg = sweeperlib.load_background_image("sprites", "background_1.png")
-map_3_bg = sweeperlib.load_background_image("sprites", "background_1.png")
+map_2_bg = sweeperlib.load_background_image("sprites", "background_2.png")
+map_3_bg = sweeperlib.load_background_image("sprites", "background_3.png")
 # endregion
 
 # region Dictionaries for game data
@@ -105,14 +110,19 @@ def drag_duck(x, y, dy, dx, MOUSE_LEFT, modifiers):
     """
     for i in range(1,4):
         if map_status["menu"] == i and not duck["flight"]:
-            if abs(x - duck["x"]) < 25 and abs(y - duck["y"]) < 25:
-                duck["x"] = x - 10
-                duck["y"] = y - 10
-                x_difference = duck["start_x"] - duck["x"]
-                y_difference = duck["start_y"] - duck["y"]
-                duck["force"] = math.sqrt((x_difference)**2 + (y_difference)**2) / 4
-                duck["angle"] = math.atan2(y_difference, x_difference)
-                duck["dragging"] = True
+            if abs(x - duck["x"]) < 60 and abs(y - duck["y"]) < 60:
+                if (l_wall < x < r_wall) and (floor < y < ceiling): 
+                    duck["x"] = x - 10
+                    duck["y"] = y - 10
+                    x_difference = duck["start_x"] - duck["x"]
+                    y_difference = duck["start_y"] - duck["y"]
+                    duck["force"] = math.sqrt((x_difference)**2 + (y_difference)**2) / 4
+                    duck["angle"] = math.atan2(y_difference, x_difference)
+                    duck["dragging"] = True
+
+
+
+                    
 
 
 def mouse_handler(x, y, MOUSE_LEFT, modifiers):
@@ -125,10 +135,10 @@ def mouse_handler(x, y, MOUSE_LEFT, modifiers):
     """
     if map_status["menu"] == 0: # Checks to see if in main menu
 
-        if 470 < x < 820 and 410 < y < 560: # If press on Choose Map
+        if 470 < x < 830 and 340 < y < 500: # If press on Choose Map
             map_status["menu"] = 4
 
-        if 470 < x < 820 and 95 < y < 245: # If press on quit
+        if 470 < x < 830 and 165 < y < 315: # If press on quit
             sweeperlib.close() # Quits the game
 
     elif map_status["menu"] == 4: # Checks to see if in choose map menu
@@ -151,7 +161,7 @@ def mouse_handler(x, y, MOUSE_LEFT, modifiers):
         if 510 < x < 770 and 90 < y < 200: # If press on back
             map_status["menu"] = 0
             map_status["bg"] = main_menu_bg
-    
+
     else:   # every other case, in a map
         pass
 
@@ -167,6 +177,20 @@ def release_duck(x, y, MOUSE_LEFT, modifiers):
             duck["angle"] = 0
             duck["force"] = 0
 
+def keyboard_handler(sym, mod):
+    key = sweeperlib.pyglet.window.key
+    for i in range(1,4):
+        if map_status["menu"] == i:
+            if sym == key.ESCAPE:
+                initial_state()
+                sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = main_menu_bg)
+                map_status["menu"] = 4
+                return
+    if map_status["menu"] == 4:
+        if sym == key.ESCAPE:
+            map_status["menu"] = 0
+            
+
 
 # endregion
 
@@ -180,6 +204,7 @@ def get_map(filename):
         map_status["targets"] = lista[0].split(":")
         map_status["objects"] = lista[1].split(":")
         map_status["ducks"] = lista[2]
+
     
 def create_targets(targets, min_y):
     """
@@ -215,17 +240,22 @@ def draw():
 
     elif map_status["menu"] == 4:     # Displays Choose Map Menu
         prepare_choosemaps()
-    
     else:       # Displays one of the maps
         prepare_map()
 
 def prepare_mainmenu():
+    """
+    Changes to mainmenu view
+    """
     sweeperlib.clear_window()
     sweeperlib.prepare_sprite("choose_map", 470, 340)
     sweeperlib.prepare_sprite("quit", 470, 165)
     sweeperlib.draw_sprites()
 
 def prepare_choosemaps():
+    """
+    Changes to choose maps view
+    """
     sweeperlib.clear_window()
     sweeperlib.prepare_sprite("map_1", 510, 450)
     sweeperlib.prepare_sprite("map_2", 510, 330)
@@ -234,7 +264,13 @@ def prepare_choosemaps():
     sweeperlib.draw_sprites()
 
 def prepare_map():
+    """
+    Changes to map view
+    """
     sweeperlib.clear_window()
+    for target in map_status["targets"]:
+        x,y = target.split(",")
+        sweeperlib.prepare_sprite("duck", int(x), int(y))
     sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = map_status["bg"])
     sweeperlib.prepare_sprite("sling", sling_x, sling_y)
     sweeperlib.prepare_sprite("duck", duck["x"], duck["y"])
@@ -245,6 +281,10 @@ def prepare_map():
 #endregion
 
 def main():
+    """
+    Loads all assets, creates window and sets all the handlers. 
+    Starts the program
+    """
     sweeperlib.load_sprites("sprites")
     sweeperlib.create_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = map_status["bg"])
     sweeperlib.set_draw_handler(draw)
@@ -252,6 +292,7 @@ def main():
     sweeperlib.set_mouse_handler(mouse_handler)
     sweeperlib.set_drag_handler(drag_duck)
     sweeperlib.set_release_handler(release_duck)
+    sweeperlib.set_keyboard_handler(keyboard_handler)
     sweeperlib.start()
 
 
