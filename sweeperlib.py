@@ -28,6 +28,7 @@ if modifiers & sweeperlib.MOD_SHIFT:
 """
 
 import pyglet
+
 # If the sweeperlib crashes while loading, you can try to uncomment these lines.
 #from pyglet.gl import glEnable, GL_TEXTURE_2D
 #glEnable(GL_TEXTURE_2D)
@@ -105,7 +106,6 @@ def load_sprites(path):
     images["map_1"] = pyglet.resource.image("map_1.png")
     images["map_2"] = pyglet.resource.image("map_2.png")
     images["back"] = pyglet.resource.image("back.png")
-    images["catapult"] = pyglet.resource.image("catapult.png")
     graphics["images"] = images
 
 def load_duck(path):

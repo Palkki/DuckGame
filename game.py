@@ -6,15 +6,11 @@ from sweeperlib import KEYS
 
 WIN_WIDTH = 1280
 WIN_HEIGHT = 720
+GRAVITY = 20
 GRAVITATION_ACCEL = 1.5     # y_velocity modifier
 BOUNCE_MODIFIER = 0.4       # Higher number == higher bounce.
 
-sling_x = 300
-sling_y = 115     
-ceiling = 350
-floor = 70
-l_wall = 50
-r_wall = 380  
+
 
 # region Backgrounds
 main_menu_bg = sweeperlib.load_background_image("sprites", "background_0.jpg")
@@ -28,21 +24,28 @@ map_status = {
     "targets": [],
     "objects": [],
     "ducks": 3,
+    "sling_x": 220,
+    "sling_y": 90,     
+    "ceiling": 340,
+    "floor": 35,
+    "l_wall": 0,
+    "r_wall": 330,  
     "menu": 0,     # 0 = mainmenu,  1 = map1,  2 = map2,  3 = random,  4 = choose maps
     "bg": main_menu_bg
 
 }
 duck = {
-    "start_x": sling_x + 22,
-    "start_y": sling_y + 110,
-    "x": sling_x + 22,
-    "y": sling_y + 110,
+    "start_x": map_status["sling_x"] + 22,
+    "start_y": map_status["sling_y"] + 110,
+    "x": map_status["sling_x"] + 22,
+    "y": map_status["sling_y"] + 110,
     "angle": 0,
     "force": 0,
     "x_velocity": 0,
     "y_velocity": 0,
     "flight": False,        # Tells if duck is flying
     "dragging": False,      # Tells if user is dragging the duck
+    "collision": False
     
 }
 #endregion
@@ -53,13 +56,14 @@ def initial_state():
     Puts the duck back into the sling and stop its movement. Reset force and angle.
     Also tells the game that the duck isn't flying anymore.
     """
-    duck["x"] = sling_x + 22
-    duck["y"] = sling_y + 110
+    duck["x"] = map_status["sling_x"] + 22
+    duck["y"] = map_status["sling_y"] + 110
     duck["angle"] = 0
     duck["force"] = 0
     duck["x_velocity"] = 0
     duck["y_velocity"] = 0
     duck["flight"] = False
+    duck["collision"] = False
 
 
 def launch():
@@ -80,17 +84,24 @@ def flight(elapsed):
         duck["x"] += duck["x_velocity"]
         duck["y"] += duck["y_velocity"]
         duck["y_velocity"] -= GRAVITATION_ACCEL
-        if duck["y"] < 100:
-            duck["y"] = 100
+        if duck["y"] < 40:
+            duck["y"] = 40
             duck["x_velocity"] /= 1.8
             duck["y_velocity"] = -BOUNCE_MODIFIER * duck["y_velocity"]
-            if duck["x_velocity"] + duck["y_velocity"] < 4:
+            if duck["x_velocity"] + duck["y_velocity"] < 4 and map_status["ducks"] > 0:
                 time.sleep(1/4)
                 initial_state()
-        #if duck hits target:
-        #   duck explode? Fall down? idk
-        #if duck hits object:
-        #   Bounce away?
+                map_status["ducks"] -= 1
+        if duck["x"] > 1400 or duck["x"] < -100 and map_status["ducks"] > 0:
+            initial_state()
+            map_status["ducks"] -= 1
+    if map_status["ducks"] <= 0:
+        time.sleep(1)
+        #lose screen here
+
+
+    #if duck hits object:
+    #   Bounce away?
 
     #for target in targets:
     #   Check if collision with duck:
@@ -111,12 +122,12 @@ def drag_duck(x, y, dy, dx, MOUSE_LEFT, modifiers):
     for i in range(1,4):
         if map_status["menu"] == i and not duck["flight"]:
             if abs(x - duck["x"]) < 60 and abs(y - duck["y"]) < 60:
-                if (l_wall < x < r_wall) and (floor < y < ceiling): 
+                if (map_status["l_wall"] < x < map_status["r_wall"]) and (map_status["floor"] < y < map_status["ceiling"]): 
                     duck["x"] = x - 10
                     duck["y"] = y - 10
                     x_difference = duck["start_x"] - duck["x"]
                     y_difference = duck["start_y"] - duck["y"]
-                    duck["force"] = math.sqrt((x_difference)**2 + (y_difference)**2) / 4
+                    duck["force"] = math.sqrt((x_difference)**2 + (y_difference)**2) / 5.2
                     duck["angle"] = math.atan2(y_difference, x_difference)
                     duck["dragging"] = True
 
@@ -201,9 +212,36 @@ def get_map(filename):
     """
     with open(filename, encoding="UTF-8") as source:
         lista = source.read().split("\n")
-        map_status["targets"] = lista[0].split(":")
-        map_status["objects"] = lista[1].split(":")
-        map_status["ducks"] = lista[2]
+        map_status["targets"] = []
+        map_status["objects"] = []
+        targets = lista[0].split(":")
+        objects = lista[1].split(":")
+        for target in targets:
+            target_x, target_y, vy = target.split(",")
+            map_status["targets"].append({
+                "x": int(target_x),
+                "y": int(target_y),
+                "vy": int(vy)
+            })
+        for object in objects:
+            object_x, object_y = object.split(",")
+            map_status["objects"].append({
+                "x": int(object_x),
+                "y": int(object_y)
+            })
+
+        map_status["ducks"] = int(lista[2])
+        map_status["sling_x"] = int(lista[3])
+        map_status["sling_y"] = int(lista[4])
+        map_status["ceiling"] = int(lista[5])
+        map_status["floor"] = int(lista[6])
+        map_status["l_wall"] = int(lista[7])
+        map_status["r_wall"] = int(lista[8])
+
+        duck["start_x"] = map_status["sling_x"] + 22
+        duck["start_y"] = map_status["sling_y"] + 110
+        initial_state()
+
 
     
 def create_targets(targets, min_y):
@@ -269,14 +307,16 @@ def prepare_map():
     """
     sweeperlib.clear_window()
     for target in map_status["targets"]:
-        x,y = target.split(",")
-        sweeperlib.prepare_sprite("duck", int(x), int(y))
+        sweeperlib.prepare_sprite("duck", int(target["x"]), int(target["y"]))
     sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = map_status["bg"])
-    sweeperlib.prepare_sprite("sling", sling_x, sling_y)
+    sweeperlib.prepare_sprite("sling", map_status["sling_x"], map_status["sling_y"])
     sweeperlib.prepare_sprite("duck", duck["x"], duck["y"])
     sweeperlib.draw_sprites()
     sweeperlib.draw_text("Aim: {}°".format(round(math.degrees(duck["angle"]))), 10, 600)
     sweeperlib.draw_text("Powah!: {}".format(round(duck["force"])), 10, 660)
+    sweeperlib.draw_text("Ducks: {}".format(map_status["ducks"]), 10, 540)
+
+
 
 #endregion
 
