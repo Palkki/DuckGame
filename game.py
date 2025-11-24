@@ -103,9 +103,16 @@ def flight(elapsed):
         map_status["menu"] = 5
 
     for target in map_status["targets"]:
-       if check_collision(duck, target):
-           print("Osui")
-           target[""] = 1
+        target["y"] -= target["vy"]
+        if check_collision(duck, target):
+            print("Osui")
+            duck["x_velocity"] /= -1.4
+            target["vy"] += GRAVITY
+        if target["y"] <= 90:
+            target["y"] = 90
+            target["vy"] = 0
+        map_status["fallen_targets"].append(target)
+        
 
 def calculate_distance(x_start, y_start, x_end, y_end):
     """
@@ -132,13 +139,13 @@ def drop(targets):
     map_status["fallen_targets"] = []
     for target in targets:
         collision = False
-        box_top = target["y"] + 60
-        for fallen_box in map_status["fallen_targets"]:
-            if not (target["x"] < fallen_box["x"] + 60 and fallen_box["x"] < target["x"] + 60):
+        target_top = target["y"] + 60
+        for fallen_target in map_status["fallen_targets"]:
+            if not (target["x"] < fallen_target["x"] + 60 and fallen_target["x"] < target["x"] + 60):
                 continue
-            fallen_box_top = fallen_box["y"] + 60
-            if target["y"] <= fallen_box_top:
-                target["y"] = fallen_box_top
+            fallen_target_top = fallen_target["y"] + 60
+            if target["y"] <= fallen_target_top:
+                target["y"] = fallen_target_top
                 target["vy"] = 0
                 collision = True
                 break
@@ -149,7 +156,7 @@ def drop(targets):
             if target["y"] <= 90:
                 target["y"] = 90
                 target["vy"] = 0
-        map_status["fallen_targets"].append(target)
+                map_status["fallen_targets"].append(target)
 
 # endregion
 
@@ -232,6 +239,7 @@ def release_duck(x, y, MOUSE_LEFT, modifiers):
             duck["dragging"] = False
             duck["angle"] = 0
             duck["force"] = 0
+            print(map_status["fallen_targets"])
 
 def keyboard_handler(sym, mod):
     key = sweeperlib.pyglet.window.key
