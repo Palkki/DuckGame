@@ -97,6 +97,8 @@ def flight(elapsed):
             map_status["ducks"] -= 1
     if map_status["ducks"] <= 0:
         time.sleep(1)
+        sweeperlib.close()
+        
         #lose screen here
 
 
