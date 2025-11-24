@@ -30,7 +30,7 @@ map_status = {
     "floor": 35,
     "l_wall": 0,
     "r_wall": 330,  
-    "menu": 0,     # 0 = mainmenu,  1 = map1,  2 = map2,  3 = random,  4 = choose maps
+    "menu": 0,     # 0 = mainmenu,  1 = map1,  2 = map2,  3 = map3, 4 = random, 5 = loser
     "bg": main_menu_bg
 
 }
@@ -97,7 +97,7 @@ def flight(elapsed):
             map_status["ducks"] -= 1
     if map_status["ducks"] <= 0:
         time.sleep(1)
-        sweeperlib.close()
+        map_status["menu"] = 5
         
         #lose screen here
 
@@ -148,33 +148,19 @@ def mouse_handler(x, y, MOUSE_LEFT, modifiers):
     """
     if map_status["menu"] == 0: # Checks to see if in main menu
 
-        if 470 < x < 830 and 340 < y < 500: # If press on Choose Map
-            map_status["menu"] = 4
-
-        if 470 < x < 830 and 165 < y < 315: # If press on quit
-            sweeperlib.close() # Quits the game
-
-    elif map_status["menu"] == 4: # Checks to see if in choose map menu
-        if 510 < x < 770 and 450 < y < 560: # If press on Map 1
+        if 515 < x < 788 and 277 < y < 327: # If press on Choose Map
             map_status["menu"] = 1
             map_status["bg"] = map_1_bg
             get_map("map_1.txt")
-            
 
-        if 510 < x < 770 and 330 < y < 440: # If press on Map 2
-            map_status["menu"] = 2
-            map_status["bg"] = map_2_bg
-            get_map("map_2.txt")
-            
-
-        if 510 < x < 770 and 210 < y < 320: # If press on Random Map
-            map_status["menu"] = 3
+        if 528 < x < 766 and 210 < y < 260: # If press on Random map
+            map_status["menu"] = 4
             map_status["bg"] = map_3_bg
 
-        if 510 < x < 770 and 90 < y < 200: # If press on back
-            map_status["menu"] = 0
-            map_status["bg"] = main_menu_bg
-
+        if 587 < x < 695 and 145 < y < 193: # If press on quit
+            sweeperlib.close() # Quits the game
+    if map_status["menu"] == 5: # Checks to see if loser menu
+        pass
     else:   # every other case, in a map
         pass
 
@@ -192,16 +178,14 @@ def release_duck(x, y, MOUSE_LEFT, modifiers):
 
 def keyboard_handler(sym, mod):
     key = sweeperlib.pyglet.window.key
-    for i in range(1,4):
+    for i in range(1,5):
         if map_status["menu"] == i:
             if sym == key.ESCAPE:
                 initial_state()
                 sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = main_menu_bg)
-                map_status["menu"] = 4
-                return
-    if map_status["menu"] == 4:
-        if sym == key.ESCAPE:
-            map_status["menu"] = 0
+                sweeperlib.clear_window()
+                map_status["menu"] = 0
+                map_status["bg"] = main_menu_bg
             
 
 
@@ -231,15 +215,12 @@ def get_map(filename):
                 "x": int(object_x),
                 "y": int(object_y)
             })
-
-        map_status["ducks"] = int(lista[2])
-        map_status["sling_x"] = int(lista[3])
-        map_status["sling_y"] = int(lista[4])
-        map_status["ceiling"] = int(lista[5])
-        map_status["floor"] = int(lista[6])
-        map_status["l_wall"] = int(lista[7])
-        map_status["r_wall"] = int(lista[8])
-        map_status["next_map"] = lista[9]
+        status_keys = ["ducks", "sling_x", "sling_y", "ceiling", "floor", "l_wall", "r_wall", "next_map"]
+        for i, key in enumerate(status_keys):
+            if key == "next_map":
+                map_status[key] = lista[i+2]
+            else:
+                map_status[key] = int(lista[i+2])
 
         duck["start_x"] = map_status["sling_x"] + 22
         duck["start_y"] = map_status["sling_y"] + 110
@@ -278,30 +259,23 @@ def draw():
     """
     if map_status["menu"] == 0:       # Displays main menu
         prepare_mainmenu()
-
-    elif map_status["menu"] == 4:     # Displays Choose Map Menu
-        prepare_choosemaps()
-    else:       # Displays one of the maps
+    elif map_status["menu"] == 5:
+        prepare_loser()
+    else:                             # Displays one of the maps
         prepare_map()
 
 def prepare_mainmenu():
     """
     Changes to mainmenu view
     """
-    sweeperlib.clear_window()
-    sweeperlib.prepare_sprite("choose_map", 470, 340)
-    sweeperlib.prepare_sprite("quit", 470, 165)
     sweeperlib.draw_sprites()
 
-def prepare_choosemaps():
+def prepare_loser():
     """
     Changes to choose maps view
     """
-    sweeperlib.clear_window()
-    sweeperlib.prepare_sprite("map_1", 510, 450)
-    sweeperlib.prepare_sprite("map_2", 510, 330)
-    sweeperlib.prepare_sprite("random_map", 510, 210)
-    sweeperlib.prepare_sprite("back", 510, 90)
+    sweeperlib.prepare_sprite("blur", 0, 0)
+    sweeperlib.prepare_sprite("loser", 0, 0)
     sweeperlib.draw_sprites()
 
 def prepare_map():
