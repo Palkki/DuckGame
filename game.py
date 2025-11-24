@@ -239,6 +239,7 @@ def get_map(filename):
         map_status["floor"] = int(lista[6])
         map_status["l_wall"] = int(lista[7])
         map_status["r_wall"] = int(lista[8])
+        map_status["next_map"] = lista[9]
 
         duck["start_x"] = map_status["sling_x"] + 22
         duck["start_y"] = map_status["sling_y"] + 110
