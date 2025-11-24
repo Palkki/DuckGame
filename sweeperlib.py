@@ -91,16 +91,12 @@ def load_sprites(path):
 
     pyglet.resource.path = [path]
     images = {}
-    images["0"] = pyglet.resource.image("tile_empty.png")
-    for i in range(1, 9):
-        images[str(i)] = pyglet.resource.image(f"tile_{i}.png")
-    images["x"] = pyglet.resource.image("tile_mine.png")
-    images[" "] = pyglet.resource.image("tile_back.png")
-    images["f"] = pyglet.resource.image("tile_flag.png")
     images["duck"] = pyglet.resource.image("duck.png")
     images["sling"] = pyglet.resource.image("sling.png")
     images["loser"] = pyglet.resource.image("loser.png")
     images["blur"] = pyglet.resource.image("blur.png")
+    images["target"] = pyglet.resource.image("target.png")
+
     graphics["images"] = images
 
 def load_duck(path):
