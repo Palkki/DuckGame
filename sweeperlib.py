@@ -94,6 +94,7 @@ def load_sprites(path):
     images["duck"] = pyglet.resource.image("duck.png")
     images["sling"] = pyglet.resource.image("sling.png")
     images["loser"] = pyglet.resource.image("loser.png")
+    images["winner"] = pyglet.resource.image("winner.png")
     images["blur"] = pyglet.resource.image("blur.png")
     images["target"] = pyglet.resource.image("target.png")
 
