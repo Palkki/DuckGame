@@ -137,7 +137,7 @@ def check_collision(object_1, object_2):
     each other, False if they do not.
     """
     distance = calculate_distance(object_1["x"], object_1["y"], object_2["x"], object_2["y"])
-    if  distance <= 50:
+    if  distance <= 60:
         return True
     return False
 
@@ -268,14 +268,6 @@ def mouse_handler(x, y, MOUSE_LEFT, modifiers):
         if 502 < x < 773 and 206 < y < 275: # If press on try again
             map_status["menu"] = 1
             get_map("map_1.txt")
-
-
-        
-
-
-
-
-        
     else:   # every other case, in a map
         pass
 
@@ -360,14 +352,26 @@ def create_targets(targets, min_y):
     vy: falling velocity of the box
     """
     targetlist = []
-    for target in range(targets):
-        targetlist.append({
-            "x": random.randint(500, 1160),
-            "y": random.randint(min_y, 500),
-            "w": 60,
-            "h": 60,
-            "vy": 0
-            })
+    for i in range(targets):
+            new_target = {
+                        "x": random.randint(500, 1160),
+                        "y": random.randint(min_y, 500),
+                        "w": 60,
+                        "h": 60,
+                        "vy": 0
+                        }
+            for target in targetlist:
+                while check_collision(target, new_target):
+                    print("Collision")
+                    new_target = {
+                        "x": random.randint(500, 1160),
+                        "y": random.randint(min_y, 500),
+                        "w": 60,
+                        "h": 60,
+                        "vy": 0
+                        }
+            targetlist.append(new_target)
+                    
     return targetlist
 
 #endregion
