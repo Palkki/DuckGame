@@ -34,7 +34,7 @@ map_status = {
     "l_wall": 0,
     "r_wall": 330,  
     "menu": 0,     # 0 = mainmenu,  1 = map1,  2 = map2,  3 = map3, 4 = random, 5 = loser, 6 = winner
-    "bg": main_menu_bg
+    "bg": main_menu_bg,
 
 }
 duck = {
@@ -94,7 +94,7 @@ def flight(elapsed):
 
     for i in range(1,5):
         if map_status["menu"] == i:
-            if len(map_status["targets"]) == 0 and map_status["menu"] != 0:
+            if len(map_status["targets"]) == 0 and len(map_status["falling_targets"]) == 0:
                 print("yay")
                 try:
                     initial_map_state()
@@ -105,7 +105,7 @@ def flight(elapsed):
                     initial_map_state()
                     prepare_random() 
                     draw_random()        
-    if map_status["ducks"] <= 0:
+    if map_status["ducks"] <= 0 and len(map_status["falling_targets"]) == 0:
         time.sleep(0.5)
         map_status["menu"] = 5                   
 
@@ -234,10 +234,12 @@ def mouse_handler(x, y, MOUSE_LEFT, modifiers):
     if map_status["menu"] == 5: # Checks to see if loser menu
         if 525 < x < 754 and 148 < y < 202: # If press on main menu
             initial_state()
+            initial_map_state()
             sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = main_menu_bg)
             sweeperlib.clear_window()
             map_status["menu"] = 0
             map_status["bg"] = main_menu_bg
+            map_status.pop("next_map")
         if 525 < x < 754 and 225 < y < 280: # If press on try again
             try:
                 if map_status["next_map"] == "map_2.txt":
@@ -265,6 +267,7 @@ def mouse_handler(x, y, MOUSE_LEFT, modifiers):
             sweeperlib.clear_window()
             map_status["menu"] = 0
             map_status["bg"] = main_menu_bg
+            map_status.pop("next_map")
         if 502 < x < 773 and 206 < y < 275: # If press on try again
             map_status["menu"] = 1
             get_map("map_1.txt")
@@ -294,6 +297,7 @@ def keyboard_handler(sym, mod):
                 map_status["bg"] = main_menu_bg
                 initial_state()
                 initial_map_state()
+                map_status.pop("next_map")
 
 # endregion
 
@@ -331,14 +335,14 @@ def get_map(filename):
         duck["start_x"] = map_status["sling_x"] + 22
         duck["start_y"] = map_status["sling_y"] + 110
         initial_state()
-        #map_status["target_count"] = len(map_status["targets"])
+
 
 
 def prepare_random():
     target_amount = random.randint(3, 6)
     map_status["ducks"] = target_amount + 2
     map_status["targets"] = create_targets(target_amount, 150)
-    #map_status["target_count"] = len(map_status["targets"])
+
 
 def create_targets(targets, min_y):
     """
