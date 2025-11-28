@@ -422,13 +422,14 @@ def draw_winner():
     sweeperlib.draw_sprites()
 
 def draw_random():
+    sweeperlib.clear_window()
+    sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = map_status["bg"])
     for target in map_status["targets"]:
         sweeperlib.prepare_sprite("target", target["x"], target["y"])
     for fallen_target in map_status["fallen_targets"]:
         sweeperlib.prepare_sprite("target", int(fallen_target["x"]), int(fallen_target["y"]))
     for falling_target in map_status["falling_targets"]:
         sweeperlib.prepare_sprite("target", int(falling_target["x"]), int(falling_target["y"]))
-    sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = map_status["bg"])
     sweeperlib.prepare_sprite("sling", map_status["sling_x"], map_status["sling_y"])
     sweeperlib.prepare_sprite("duck", duck["x"], duck["y"])
     sweeperlib.draw_sprites()
@@ -441,13 +442,13 @@ def draw_map():
     Changes to map view
     """
     sweeperlib.clear_window()
+    sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = map_status["bg"])
     for target in map_status["targets"]:
         sweeperlib.prepare_sprite("target", int(target["x"]), int(target["y"]))
     for fallen_target in map_status["fallen_targets"]:
         sweeperlib.prepare_sprite("target", int(fallen_target["x"]), int(fallen_target["y"]))
     for falling_target in map_status["falling_targets"]:
         sweeperlib.prepare_sprite("target", int(falling_target["x"]), int(falling_target["y"]))
-    sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = map_status["bg"])
     sweeperlib.prepare_sprite("sling", map_status["sling_x"], map_status["sling_y"])
     sweeperlib.prepare_sprite("duck", duck["x"], duck["y"])
     sweeperlib.draw_sprites()
