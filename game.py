@@ -1,8 +1,11 @@
-import sweeperlib
+"""
+Duck Game
+"""
+
 import random
 import math
 import time
-from sweeperlib import KEYS
+import sweeperlib
 
 WIN_WIDTH = 1280
 WIN_HEIGHT = 720
@@ -15,7 +18,7 @@ Y_LAUNCH_VEL = 1.25
 
 
 # region Backgrounds
-main_menu_bg = sweeperlib.load_background_image("sprites", "background_0.jpg")
+main_bg = sweeperlib.load_background_image("sprites", "background_0.jpg")
 map_1_bg = sweeperlib.load_background_image("sprites", "background_1.png")
 map_2_bg = sweeperlib.load_background_image("sprites", "background_2.png")
 map_3_bg = sweeperlib.load_background_image("sprites", "background_3.png")
@@ -24,6 +27,7 @@ map_3_bg = sweeperlib.load_background_image("sprites", "background_3.png")
 # region Dictionaries for game data
 map_status = {
     "targets": [],
+    "objects": [],
     "falling_targets": [],
     "fallen_targets": [],
     "ducks": 5,
@@ -33,8 +37,8 @@ map_status = {
     "floor": 35,
     "l_wall": 0,
     "r_wall": 330,  
-    "menu": 0,     # 0 = mainmenu,  1 = map1,  2 = map2,  3 = map3, 4 = random, 5 = loser, 6 = winner
-    "bg": main_menu_bg,
+    "menu": 0,   # 0 = main,  1 = map1,  2 = map2,  3 = map3, 4 = random, 5 = loser, 6 = winner
+    "bg": main_bg,
 
 }
 duck = {
@@ -49,7 +53,7 @@ duck = {
     "flight": False,        # Tells if duck is flying
     "dragging": False,      # Tells if user is dragging the duck
     "collision": False
-    
+
 }
 #endregion
 
@@ -71,7 +75,11 @@ def initial_state():
     print("Targets left: ", len(map_status["targets"]), "\n")
 
 def initial_map_state():
+    """
+    Reset map state, where default there are no objects, targets or ducks.
+    """
     map_status["targets"] = []
+    map_status["objects"] = []
     map_status["falling_targets"] = []
     map_status["fallen_targets"] = []
     map_status["ducks"] = 5
@@ -100,14 +108,14 @@ def flight(elapsed):
                     initial_map_state()
                     get_map(map_status["next_map"])
                 except FileNotFoundError:
-                    map_status["menu"] = 6  
+                    map_status["menu"] = 6
                 except KeyError:
                     initial_map_state()
-                    prepare_random() 
-                    draw_random()        
+                    prepare_random()
+                    draw_random()
     if map_status["ducks"] <= 0 and len(map_status["falling_targets"]) == 0:
         time.sleep(0.5)
-        map_status["menu"] = 5                   
+        map_status["menu"] = 5
 
     if duck["flight"]:
         duck["x"] += duck["x_velocity"]
@@ -131,13 +139,13 @@ def calculate_distance(x_start, y_start, x_end, y_end):
     """
     return math.sqrt((x_end - x_start)**2 + (y_end - y_start)**2)
 
-def check_collision(object_1, object_2):
+def check_collision(object_1, object_2, dist):
     """
     Calculates the distance between two objects and returns True if the objects hit
     each other, False if they do not.
     """
     distance = calculate_distance(object_1["x"], object_1["y"], object_2["x"], object_2["y"])
-    if  distance <= 60:
+    if  distance <= dist:
         return True
     return False
 
@@ -147,10 +155,10 @@ def drop(targets):
     defined as a dictionary with x and y coordinates, width, height, and falling
     velocity. Drops boxes for one time unit.  
     """
-    
+
     for target in targets:
-        if check_collision(duck, target):
-            print("Osui")    
+        if check_collision(duck, target, 60):
+            print("Osui")
             initial_state()
             map_status["ducks"] -= 1
             target["vy"] += GRAVITY
@@ -160,7 +168,10 @@ def drop(targets):
     for falling_target in map_status["falling_targets"]:
         falling_target["y"] -= falling_target["vy"]
         for fallen_target in map_status["fallen_targets"]:
-            if not (falling_target["x"] < fallen_target["x"] + 60 and fallen_target["x"] < falling_target["x"] + 60):
+            if not (
+                falling_target["x"] < fallen_target["x"] + 60
+                and fallen_target["x"] < falling_target["x"] + 60
+            ):
                 continue
             fallen_target_top = fallen_target["y"] + 60
             if falling_target["y"] < fallen_target_top:
@@ -172,10 +183,9 @@ def drop(targets):
             falling_target["y"] = 40
             falling_target["vy"] = 0
         if falling_target not in map_status["fallen_targets"] and falling_target["vy"] == 0:
-                map_status["fallen_targets"].append(falling_target)   
-                map_status["falling_targets"].remove(falling_target)   
-        
-                
+            map_status["fallen_targets"].append(falling_target)
+            map_status["falling_targets"].remove(falling_target)
+
 
 # endregion
 
@@ -183,17 +193,24 @@ def drop(targets):
 
 def drag_duck(x, y, dy, dx, MOUSE_LEFT, modifiers):
     """
-    This function oversees where the user is dragging the mouse and when it can drag. 
+    This function oversees where the user is dragging the mouse and when it can drag.
     The game's only drag function is to drag the chicken so dragging only does stuff when user is
-    in a map. It's also only allowed when the bird isn't flying. (Please don't disturb birds in the air)
+    in a map. It's also only allowed when the bird isn't flying.
+    (Please don't disturb birds in the air)
     Basically here the game calculates how fast to send the bird flying based on
     how far it is from its starting point (the sling)
 
     """
     for i in range(1,5):
         if map_status["menu"] == i and not duck["flight"]:
-            if abs(x - duck["x"]) < 60 and abs(y - duck["y"]) < 60:
-                if (map_status["l_wall"] < x < map_status["r_wall"]) and (map_status["floor"] < y < map_status["ceiling"]): 
+            if (
+                abs(x - duck["x"]) < 60
+                and abs(y - duck["y"]) < 60
+            ):
+                if (
+                    (map_status["l_wall"] < x < map_status["r_wall"])
+                    and (map_status["floor"] < y < map_status["ceiling"])
+                ):
                     duck["x"] = x - 10
                     duck["y"] = y - 10
                     x_difference = duck["start_x"] - duck["x"]
@@ -202,17 +219,12 @@ def drag_duck(x, y, dy, dx, MOUSE_LEFT, modifiers):
                     duck["angle"] = math.atan2(y_difference, x_difference)
                     duck["dragging"] = True
 
-
-
-                    
-
-
 def mouse_handler(x, y, MOUSE_LEFT, modifiers):
     """
     This function's only job is to click menus etc.
     It checks where the user is currently (main menu, map1, map2...) and lets the user click
     on boxes and text only related to that page.
-    The function also updates the map_status dictionary so that the game knows where the user actually
+    The function updates the map_status dictionary so that the game knows where the user actually
     is at all times.
     """
     if map_status["menu"] == 0: # Checks to see if in main menu
@@ -226,7 +238,6 @@ def mouse_handler(x, y, MOUSE_LEFT, modifiers):
             prepare_random()
             map_status["menu"] = 4
             map_status["bg"] = map_3_bg
-            
 
         if 587 < x < 695 and 145 < y < 193: # If press on quit
             sweeperlib.close() # Quits the game
@@ -235,10 +246,10 @@ def mouse_handler(x, y, MOUSE_LEFT, modifiers):
         if 525 < x < 754 and 148 < y < 202: # If press on main menu
             initial_state()
             initial_map_state()
-            sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = main_menu_bg)
+            sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = main_bg)
             sweeperlib.clear_window()
             map_status["menu"] = 0
-            map_status["bg"] = main_menu_bg
+            map_status["bg"] = main_bg
             map_status.pop("next_map")
         if 525 < x < 754 and 225 < y < 280: # If press on try again
             try:
@@ -258,15 +269,14 @@ def mouse_handler(x, y, MOUSE_LEFT, modifiers):
                 map_status["menu"] = 4
                 initial_map_state()
                 prepare_random()
-            
-    
+
     if map_status["menu"] == 6: # Checks to see if winner menu
         if 502 < x < 773 and 120 < y < 186: # If press on main menu
             initial_state()
-            sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = main_menu_bg)
+            sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = main_bg)
             sweeperlib.clear_window()
             map_status["menu"] = 0
-            map_status["bg"] = main_menu_bg
+            map_status["bg"] = main_bg
             map_status.pop("next_map")
         if 502 < x < 773 and 206 < y < 275: # If press on try again
             map_status["menu"] = 1
@@ -276,25 +286,28 @@ def mouse_handler(x, y, MOUSE_LEFT, modifiers):
 
 
 def release_duck(x, y, MOUSE_LEFT, modifiers):
-        """
-        When the user releases the dragging of the duck, it goes flying in the air. 
-        Also sets the angle and force to their respective initial states.
-        """
-        if duck["dragging"]:
-            launch()
-            duck["dragging"] = False
-            duck["angle"] = 0
-            duck["force"] = 0
+    """
+    When the user releases the dragging of the duck, it goes flying in the air. 
+    Also sets the angle and force to their respective initial states.
+    """
+    if duck["dragging"]:
+        launch()
+        duck["dragging"] = False
+        duck["angle"] = 0
+        duck["force"] = 0
 
 def keyboard_handler(sym, mod):
+    """
+    When in map, checks if the user presses escape and then sends to main menu
+    """
     key = sweeperlib.pyglet.window.key
     for i in range(1,7):
         if map_status["menu"] == i:
             if sym == key.ESCAPE:
-                sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = main_menu_bg)
+                sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = main_bg)
                 sweeperlib.clear_window()
                 map_status["menu"] = 0
-                map_status["bg"] = main_menu_bg
+                map_status["bg"] = main_bg
                 initial_state()
                 initial_map_state()
                 map_status.pop("next_map")
@@ -320,12 +333,17 @@ def get_map(filename):
                 "vy": int(vy)
             })
         for object in objects:
-            object_x, object_y = object.split(",")
+            object_x, object_y, object_h = object.split(",")
             map_status["objects"].append({
                 "x": int(object_x),
-                "y": int(object_y)
+                "y": int(object_y),
+                "w": 50,
+                "h": int(object_h)
             })
-        status_keys = ["ducks", "sling_x", "sling_y", "ceiling", "floor", "l_wall", "r_wall", "next_map"]
+        status_keys = [
+            "ducks", "sling_x", "sling_y", "ceiling", "floor",
+            "l_wall", "r_wall", "next_map"
+            ]
         for i, key in enumerate(status_keys):
             if key == "next_map":
                 map_status[key] = lista[i+2]
@@ -339,9 +357,13 @@ def get_map(filename):
 
 
 def prepare_random():
+    """
+    Prepares a random map by creating targets and objects
+    """
     target_amount = random.randint(3, 6)
     map_status["ducks"] = target_amount + 2
     map_status["targets"] = create_targets(target_amount, 150)
+    map_status["objects"] = create_objects(2, 100)
 
 
 def create_targets(targets, min_y):
@@ -357,26 +379,67 @@ def create_targets(targets, min_y):
     """
     targetlist = []
     for i in range(targets):
-            new_target = {
-                        "x": random.randint(500, 1160),
-                        "y": random.randint(min_y, 500),
-                        "w": 60,
-                        "h": 60,
-                        "vy": 0
-                        }
-            for target in targetlist:
-                while check_collision(target, new_target):
-                    print("Collision")
-                    new_target = {
-                        "x": random.randint(500, 1160),
-                        "y": random.randint(min_y, 500),
-                        "w": 60,
-                        "h": 60,
-                        "vy": 0
-                        }
-            targetlist.append(new_target)
-                    
+        new_target = {
+                    "x": random.randint(500, 1160),
+                    "y": random.randint(min_y, 500),
+                    "w": 60,
+                    "h": 60,
+                    "vy": 0
+                    }
+        for target in targetlist:
+            while check_collision(target, new_target, 60):
+                print("Collision")
+                new_target = {
+                    "x": random.randint(500, 1160),
+                    "y": random.randint(min_y, 500),
+                    "w": 60,
+                    "h": 60,
+                    "vy": 0
+                    }
+        targetlist.append(new_target)
+
     return targetlist
+
+def create_objects(objects, min_height):
+    """
+    Creates a speficied number of objects with random positions inside the specified
+    area, used for the random map mode. 
+    Objects are represented as dictionaries with the following keys:
+    x: x coordinate of the bottom left corner
+    y: y coordinate of the bottom left corner
+    w: target width
+    h: target height
+    vy: falling velocity of the box
+    """
+    objectlist = []
+    for i in range(objects):
+        new_object = {
+                    "x": random.randint(500, 1160),
+                    "y": 90,
+                    "w": 50,
+                    "h": random.randint(min_height, 250)
+                    }
+        for object in objectlist:
+            while check_collision(object, new_object, 50):
+                print("Object Collision")
+                new_object = {
+                    "x": random.randint(500, 1160),
+                    "y": 90,
+                    "w": 50,
+                    "h": random.randint(min_height, 250)
+                    }
+            for target in map_status["targets"]:
+                while check_collision(target, new_object, 50):
+                    print("Object and duck Collision")
+                    new_object = {
+                        "x": random.randint(500, 1160),
+                        "y": 90,
+                        "w": 50,
+                        "h": random.randint(min_height, 250)
+                        }
+        objectlist.append(new_object)
+
+    return objectlist
 
 #endregion
 
@@ -424,6 +487,10 @@ def draw_winner():
 def draw_random():
     sweeperlib.clear_window()
     sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = map_status["bg"])
+    for object in map_status["objects"]:
+        sweeperlib.prepare_rectangle(
+            object["x"], object["y"], object["w"], object["h"], color=(0, 0, 0, 128)
+            )
     for target in map_status["targets"]:
         sweeperlib.prepare_sprite("target", target["x"], target["y"])
     for fallen_target in map_status["fallen_targets"]:
@@ -442,7 +509,13 @@ def draw_map():
     Changes to map view
     """
     sweeperlib.clear_window()
-    sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = map_status["bg"])
+    sweeperlib.resize_window(
+        width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = map_status["bg"]
+        )
+    for object in map_status["objects"]:
+        sweeperlib.prepare_rectangle(
+            object["x"], object["y"], object["w"], object["h"], color=(0, 0, 0, 128)
+            )
     for target in map_status["targets"]:
         sweeperlib.prepare_sprite("target", int(target["x"]), int(target["y"]))
     for fallen_target in map_status["fallen_targets"]:

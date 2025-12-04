@@ -401,7 +401,7 @@ def draw_background():
 def draw_text(text, x, y, color=(0, 0, 0, 255), font="Calibri", size=32):
     """
     Draws text on the screen. Can be used if you want to write something to
-    the game window (e.g. counters or instructions). Default font is serif,
+    the game window (e.g. counters or instructions). Default font is Calibri,
     size 32, color black. These can be altered by providing the function its
     optional arguments. The x and y coordinates define the bottom left corner
     of the text.
