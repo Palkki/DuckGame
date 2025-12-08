@@ -71,8 +71,6 @@ def initial_state():
     duck["y_velocity"] = 0
     duck["flight"] = False
     duck["collision"] = False
-    print("Fallen: ", map_status["fallen_targets"])
-    print("Targets left: ", len(map_status["targets"]), "\n")
 
 def initial_map_state():
     """
@@ -98,12 +96,12 @@ def flight(elapsed):
     Updates duck's x and y coordinates based on corresponding velocity vectors.
     If the duck hits the ground or another object it reacts to it here
     """
+    check_object_collision(map_status["objects"])
     drop(map_status["targets"])
 
     for i in range(1,5):
         if map_status["menu"] == i:
             if len(map_status["targets"]) == 0 and len(map_status["falling_targets"]) == 0:
-                print("yay")
                 try:
                     initial_map_state()
                     get_map(map_status["next_map"])
@@ -149,6 +147,36 @@ def check_collision(object_1, object_2, dist):
         return True
     return False
 
+def check_object_collision(objects):
+    """
+    Calculates the distance between two objects and returns True if the objects hit
+    each other, False if they do not.
+    """
+    for object in objects:
+        if (
+            object["x"] <= (duck["x"] + 40) <= (object["x"] + object["w"])
+            and duck["y"] <= (100 + object["h"])
+            ):
+            if duck["y"] < object["h"] + 80:
+                duck["x"] = object["x"] - 40
+                duck["x_velocity"] /= -1.8
+            else:
+                duck["y"] = object["h"] + 100
+                duck["y_velocity"] /= -1.8
+        elif (
+            object["x"] + object["w"] >= duck["x"] >= object["x"]
+            and duck["y"] <= (100 + object["h"])
+            ):
+            if duck["y"] < object["h"] + 80:
+                duck["x"] = object["x"] + object["w"]
+                duck["x_velocity"] /= -1.8
+            else:
+                duck["y"] = object["h"] + 100
+                duck["y_velocity"] /= -1.8
+
+
+
+
 def drop(targets):
     """
     Drops targets that are given as a list. Each object is to be
@@ -158,7 +186,6 @@ def drop(targets):
 
     for target in targets:
         if check_collision(duck, target, 60):
-            print("Osui")
             initial_state()
             map_status["ducks"] -= 1
             target["vy"] += GRAVITY
@@ -388,7 +415,6 @@ def create_targets(targets, min_y):
                     }
         for target in targetlist:
             while check_collision(target, new_target, 60):
-                print("Collision")
                 new_target = {
                     "x": random.randint(500, 1160),
                     "y": random.randint(min_y, 500),
@@ -414,28 +440,26 @@ def create_objects(objects, min_height):
     objectlist = []
     for i in range(objects):
         new_object = {
-                    "x": random.randint(500, 1160),
+                    "x": random.randint(500, 950),
                     "y": 90,
                     "w": 50,
-                    "h": random.randint(min_height, 250)
+                    "h": random.randint(min_height, 350)
                     }
         for object in objectlist:
-            while check_collision(object, new_object, 50):
-                print("Object Collision")
+            while check_collision(object, new_object, 200):
                 new_object = {
-                    "x": random.randint(500, 1160),
+                    "x": random.randint(500, 950),
                     "y": 90,
                     "w": 50,
-                    "h": random.randint(min_height, 250)
+                    "h": random.randint(min_height, 350)
                     }
             for target in map_status["targets"]:
-                while check_collision(target, new_object, 50):
-                    print("Object and duck Collision")
+                while check_collision(target, new_object, 70):
                     new_object = {
-                        "x": random.randint(500, 1160),
+                        "x": random.randint(500, 950),
                         "y": 90,
                         "w": 50,
-                        "h": random.randint(min_height, 250)
+                        "h": random.randint(min_height, 350)
                         }
         objectlist.append(new_object)
 
@@ -514,7 +538,7 @@ def draw_map():
         )
     for object in map_status["objects"]:
         sweeperlib.prepare_rectangle(
-            object["x"], object["y"], object["w"], object["h"], color=(0, 0, 0, 128)
+            object["x"], object["y"], object["w"], object["h"], color=(0, 0, 0, 200)
             )
     for target in map_status["targets"]:
         sweeperlib.prepare_sprite("target", int(target["x"]), int(target["y"]))
