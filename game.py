@@ -148,8 +148,7 @@ def check_collision(object_1, object_2, dist):
 
 def check_object_collision(objects):
     """
-    Calculates the distance between two objects and returns True if the objects hit
-    each other, False if they do not.
+    Checks if the duck hits any of the objects, if it does, the duck bounces the away.
     """
     for object in objects:
         if (
