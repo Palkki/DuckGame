@@ -20,8 +20,7 @@ Y_LAUNCH_VEL = 1.25
 # region Backgrounds
 main_bg = sweeperlib.load_background_image("sprites", "background_0.jpg")
 map_1_bg = sweeperlib.load_background_image("sprites", "background_1.png")
-map_2_bg = sweeperlib.load_background_image("sprites", "background_2.png")
-map_3_bg = sweeperlib.load_background_image("sprites", "background_3.png")
+rand_map_bg = sweeperlib.load_background_image("sprites", "rand_map_bg.png")
 # endregion
 
 # region Dictionaries for game data
@@ -264,7 +263,7 @@ def mouse_handler(x, y, MOUSE_LEFT, modifiers):
         if 528 < x < 766 and 210 < y < 260: # If press on Random map
             prepare_random()
             map_status["menu"] = 4
-            map_status["bg"] = map_3_bg
+            map_status["bg"] = rand_map_bg
 
         if 587 < x < 695 and 145 < y < 193: # If press on quit
             sweeperlib.close() # Quits the game
@@ -513,7 +512,7 @@ def draw_random():
     sweeperlib.resize_window(width=WIN_WIDTH, height=WIN_HEIGHT, bg_image = map_status["bg"])
     for object in map_status["objects"]:
         sweeperlib.prepare_rectangle(
-            object["x"], object["y"], object["w"], object["h"], color=(0, 0, 0, 128)
+            object["x"], object["y"], object["w"], object["h"], color=(0, 0, 0, 200)
             )
     for target in map_status["targets"]:
         sweeperlib.prepare_sprite("target", target["x"], target["y"])
